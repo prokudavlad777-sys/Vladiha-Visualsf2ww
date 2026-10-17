@@ -1,0 +1,16 @@
+name: Lua (LÖVE)
+on:
+  push:
+    paths: ["lua/**", ".github/workflows/lua.yml"]
+  workflow_dispatch:
+jobs:
+  love:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pack .love
+        run: cd lua && zip -9 -r ../war2d.love . -x "*.git*"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: war2d-lua-love
+          path: war2d.love
