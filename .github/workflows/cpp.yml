@@ -1,0 +1,34 @@
+name: C++ (raylib)
+on:
+  push:
+    paths: ["cpp/**", ".github/workflows/cpp.yml"]
+  workflow_dispatch:
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libwayland-dev libxkbcommon-dev
+      - name: Configure
+        run: cmake -S cpp -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release
+      - name: Collect (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: mkdir out && cp build/Release/war2d.exe out/ && cp -r build/Release/assets out/
+      - name: Collect (Linux)
+        if: runner.os == 'Linux'
+        run: mkdir out && cp build/war2d out/ && cp -r build/assets out/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: war2d-cpp-${{ runner.os }}
+          path: out
